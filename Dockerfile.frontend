@@ -1,0 +1,25 @@
+FROM python:3.13-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
+    EXCEL_INPUT_DIR=/workspace/inputs \
+    EXCEL_OUTPUT_DIR=/workspace/outputs \
+    EXCEL_INPUT_VOLUME=excel-assistant-inputs \
+    EXCEL_OUTPUT_VOLUME=excel-assistant-outputs \
+    EXCEL_EXECUTION_IMAGE=excel-mcp-executor:latest \
+    MODEL_NAME=qwen3:4b \
+    LLM_BASE_URL=http://host.docker.internal:11434/v1 \
+    LLM_API_KEY=ollama
+WORKDIR /app
+
+RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources \
+    && apt-get update \
+    && apt-get install --no-install-recommends -y docker-cli \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY frontend-requirements.txt .
+RUN pip install --no-cache-dir -r frontend-requirements.txt
+COPY app.py server.py runner.py ./
+COPY src ./src
+
+EXPOSE 8501
+CMD ["streamlit", "run", "app.py", "--server.address=0.0.0.0", "--server.port=8501"]

@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "excel-mcp-assistant"
+version = "0.1.0"
+description = "Docker-backed Excel MCP assistant for workbook operations"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp==1.30.0",
+    "pytest==8.4.2",
+    "openpyxl==3.1.5",
+    "streamlit==1.64.0",
+    "langchain-mcp-adapters==0.3.2",
+    "langchain-openai==1.6.4",
+    "langgraph==1.2.12",
+    "python-dotenv==1.2.3",
+]
+
+[project.scripts]
+excel-mcp-server = "excel_mcp.server:main"
+excel-mcp-ui = "excel_mcp.ui:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

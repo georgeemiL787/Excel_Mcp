@@ -1,0 +1,44 @@
+services:
+  excel-assistant:
+    image: excel-mcp-frontend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    depends_on:
+      - excel-executor
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      EXCEL_INPUT_DIR: /workspace/inputs
+      EXCEL_OUTPUT_DIR: /workspace/outputs
+      EXCEL_INPUT_VOLUME: excel-assistant-inputs
+      EXCEL_OUTPUT_VOLUME: excel-assistant-outputs
+      EXCEL_EXECUTION_IMAGE: excel-mcp-executor:latest
+      MODEL_NAME: qwen3:4b
+      LLM_BASE_URL: http://host.docker.internal:11434/v1
+      LLM_API_KEY: ollama
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - excel-assistant-inputs:/workspace/inputs
+      - excel-assistant-outputs:/workspace/outputs
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  excel-executor:
+    image: excel-mcp-executor:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "-c", "import time; time.sleep(2147483647)"]
+    restart: unless-stopped
+    volumes:
+      - excel-assistant-inputs:/inputs
+      - excel-assistant-outputs:/outputs
+
+volumes:
+  excel-assistant-inputs:
+    name: excel-assistant-inputs
+  excel-assistant-outputs:
+    name: excel-assistant-outputs
